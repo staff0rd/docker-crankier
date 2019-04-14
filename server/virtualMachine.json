@@ -16,9 +16,20 @@
           "description": "User name for the Virtual Machine."
         }
       },
+      "vmSize": {
+        "type": "string",
+        "defaultValue": "Standard_B1s",
+        "metadata": {
+          "description": "Size of VM to provision for the server"
+        }
+      },
       "authenticationType": {
         "type": "string",
         "defaultValue": "sshPublicKey",
+        "allowedValues": [
+          "sshPublicKey",
+          "password"
+        ],
         "metadata": {
           "description": "Type of authentication to use on the Virtual Machine. SSH key is recommended."
         }
@@ -64,7 +75,6 @@
       "publicIPAddressName": "server-ip",
       "publicIPAddressType": "Dynamic",
       "vmName": "server-vm",
-      "vmSize": "Standard_B1s",
       "virtualNetworkName": "server-vnet",
       "linuxConfiguration": {
         "disablePasswordAuthentication": true,
@@ -167,7 +177,7 @@
         ],
         "properties": {
           "hardwareProfile": {
-            "vmSize": "[variables('vmSize')]"
+            "vmSize": "[parameters('vmSize')]"
           },
           "osProfile": {
             "computerName": "[variables('vmName')]",
