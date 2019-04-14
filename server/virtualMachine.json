@@ -2,13 +2,6 @@
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-      "vmScriptPath": {
-        "type": "string",
-        "defaultValue": "https://api.github.com/repos/staff0rd/docker-crankier/contents/server/virtualMachine.sh",
-        "metadata": {
-          "description": "Script that will be executed immediately on VM during provisioning"
-        }
-      },
       "adminUsername": {
         "type": "string",
         "defaultValue": "crankier",
@@ -234,7 +227,8 @@
                   "settings": {
                     },
                   "protectedSettings": {
-                    "commandToExecute": "[concat('curl -o ./custom-script.sh --header ''Authorization: token ', parameters('githubPat'), ''' --header ''Accept: application/vnd.github.v3.raw'' --remote-name --location ', parameters('vmScriptPath'), ' && chmod +x ./custom-script.sh && ./custom-script.sh')]"
+                    "fileUris": ["https://raw.githubusercontent.com/staff0rd/docker-crankier/master/server/virtualMachine.sh"],
+                    "commandToExecute": "./virtualMachine.sh"
                   }
                 }
               }
