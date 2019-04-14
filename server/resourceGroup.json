@@ -1,0 +1,25 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+    "contentVersion": "1.0.0.1",
+    "parameters": {
+        "resourceGroupName": {
+            "type": "string",
+            "defaultValue": "crankier"
+        },
+        "resourceGroupLocation": {
+            "type": "string",
+            "defaultValue": "westus2"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Resources/resourceGroups",
+            "apiVersion": "2018-05-01",
+            "location": "[parameters('resourceGroupLocation')]",
+            "name": "[parameters('resourceGroupName')]",
+            "properties": {}
+        }
+    ],
+    "outputs": {}
+}
