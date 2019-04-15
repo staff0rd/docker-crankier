@@ -6,13 +6,15 @@ param (
     [string] $vmSize = "Standard_B1s"
 )
 
-$exists = Get-AzResourceGroup -name $resourceGroupName
+$exists = Get-AzResourceGroup -name $resourceGroupName -EA SilentlyContinue
 
 if (-Not $exists) {
     Write-Host Creating resource group $resourceGroupName
-    New-AzDeployment 
+    New-AzDeployment `
         -TemplateFile .\resourceGroup.json `
-        -Location $location -ResourceGroupName $resourceGroupName -ResourceGroupLocation $location
+        -Location $location `
+        -ResourceGroupName $resourceGroupName `
+        -ResourceGroupLocation $location
 }
 Else {
     Write-Host Resource group $resourceGroupName already exists
