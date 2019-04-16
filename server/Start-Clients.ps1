@@ -6,13 +6,15 @@ param (
     [Parameter(Mandatory)]
     [string] $url,
     [int] $workers = 10,
-    [int] $connections = 10000
+    [int] $connections = 10000,
+    [int] $offset = 0
 )
 
 Enable-AzContextAutosave
 
 For ($i=1; $i -lt $count + 1; $i++) {
-    $name = "crankier-container-$i"
+    $number = $i + $offset
+    $name = "crankier-container-$number"
     $command = "dotnet run -- local --target-url $url --workers $workers --connections $connections"
     $scriptBlock = {
         param($resourceGroupName, $name, $memory, $cpu, $command)
@@ -28,3 +30,5 @@ For ($i=1; $i -lt $count + 1; $i++) {
     
     Write-Host Starting $name
 }
+
+
