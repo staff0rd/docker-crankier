@@ -192,7 +192,7 @@
           "count": "[parameters('numberOfInstances')]"
         },
         "identity": {
-          "type": "userAssigned",
+          "type": "UserAssigned",
           "userAssignedIdentities": {
               "[resourceID(variables('userAssignedIdentityResourceGroup'),'Microsoft.ManagedIdentity/userAssignedIdentities/',variables('userAssignedIdentityName'))]": {}
           }
@@ -259,7 +259,7 @@
                   "settings": {
                     },
                   "protectedSettings": {
-                    "fileUris": ["https://raw.githubusercontent.com/staff0rd/docker-crankier/master/server/virtualMachine.sh"],
+                    "fileUris": ["https://raw.githubusercontent.com/staff0rd/docker-crankier/master/client/vm/startupScript.sh"],
                     "commandToExecute": "./virtualMachine.sh"
                   }
                 }
