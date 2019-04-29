@@ -63,8 +63,6 @@
       "subnetName": "Subnet",
       "subnetPrefix": "10.0.0.0/24",
       "storageAccountType": "Standard_LRS",
-      "userAssignedIdentityResourceGroup": "container-registry",
-      "userAssignedIdentityName": "container-registry-identity",
       "publicIPAddressName": "server-ip",
       "publicIPAddressType": "Dynamic",
       "vmName": "server-vm",
@@ -158,12 +156,6 @@
         "apiVersion": "2018-10-01",
         "name": "[variables('vmName')]",
         "location": "[parameters('location')]",
-        "identity": {
-          "type": "userAssigned",
-          "userAssignedIdentities": {
-              "[resourceID(variables('userAssignedIdentityResourceGroup'),'Microsoft.ManagedIdentity/userAssignedIdentities/',variables('userAssignedIdentityName'))]": {}
-          }
-        },
         "dependsOn": [
           "[resourceId('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]",
           "[resourceId('Microsoft.Network/networkInterfaces/', variables('nicName'))]"
