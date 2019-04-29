@@ -6,12 +6,12 @@ param (
     [string] $vmSize = "Standard_B1s"
 )
 
-& ((Split-Path $MyInvocation.InvocationName) + "\..\CreateResourceGroup.ps1") -ResourceGroupName $resourceGroupName -Location $location
+& ((Split-Path $MyInvocation.InvocationName) + "\..\..\CreateResourceGroup.ps1") -ResourceGroupName $resourceGroupName -Location $location
 
 Write-Host Deploying Virtual Machine
 
 New-AzResourceGroupDeployment -ResourceGroupName $resourceGroupName `
     -Location $location `
-    -TemplateFile .\virtualMachine.json `
+    -TemplateFile .\clientVM.json `
     -TemplateParameterFile $parameterFile `
     -vmSize $vmSize
