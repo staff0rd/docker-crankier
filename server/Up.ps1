@@ -1,9 +1,9 @@
 param (
     [string] $resourceGroupName = "crankier",
     [string] $location = "westus2",
-    [Parameter(Mandatory)]
-    [string] $parameterFile,
-    [string] $vmSize = "Standard_B2ms"
+    [string] $parameterFile = "virtualMachine.parameters.secret.json",
+    [string] $vmSize = "Standard_D2s_v3",
+    [string] $vmName = "server"
 )
 
 & ((Split-Path $MyInvocation.InvocationName) + "\..\CreateResourceGroup.ps1") -ResourceGroupName $resourceGroupName -Location $location
@@ -14,4 +14,5 @@ New-AzResourceGroupDeployment -ResourceGroupName $resourceGroupName `
     -Location $location `
     -TemplateFile .\virtualMachine.json `
     -TemplateParameterFile $parameterFile `
-    -vmSize $vmSize
+    -vmSize $vmSize `
+    -vmName $vmName

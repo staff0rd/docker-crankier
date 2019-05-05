@@ -11,7 +11,6 @@
       },
       "vmSize": {
         "type": "string",
-        "defaultValue": "Standard_B1s",
         "metadata": {
           "description": "Size of VM to provision for the server"
         }
@@ -33,12 +32,6 @@
           "description": "SSH Key or password for the Virtual Machine. SSH key is recommended."
         }
       },
-      "dnsLabelPrefix": {
-        "type": "string",
-        "metadata": {
-          "description": "Unique DNS Name for the Public IP used to access the Virtual Machine."
-        }
-      },
       "ubuntuOSVersion": {
         "type": "string",
         "defaultValue": "16.04.0-LTS",
@@ -52,21 +45,23 @@
         "metadata": {
           "description": "Location for all resources."
         }
+      },
+      "vmName": {
+        "type": "string",
+        "defaultValue": "server"
       }
     },
     "variables": {
-      "storageAccountName": "[concat(uniquestring(resourceGroup().id), 'salinuxvm')]",
       "imagePublisher": "Canonical",
       "imageOffer": "UbuntuServer",
-      "nicName": "server-nic",
+      "nicName": "[concat(parameters('vmName'), '-nic')]",
       "addressPrefix": "10.0.0.0/16",
       "subnetName": "Subnet",
       "subnetPrefix": "10.0.0.0/24",
-      "storageAccountType": "Standard_LRS",
-      "publicIPAddressName": "server-ip",
+      "publicIPAddressName": "[concat(parameters('vmName'), '-ip')]",
       "publicIPAddressType": "Dynamic",
-      "vmName": "server-vm",
-      "virtualNetworkName": "server-vnet",
+      "vmName": "[concat(parameters('vmName'), '-vm')]",
+      "virtualNetworkName": "[concat(parameters('vmName'), '-vnet')]",
       "linuxConfiguration": {
         "disablePasswordAuthentication": true,
         "ssh": {
@@ -82,17 +77,6 @@
     },
     "resources": [
       {
-        "type": "Microsoft.Storage/storageAccounts",
-        "apiVersion": "2018-11-01",
-        "name": "[variables('storageAccountName')]",
-        "location": "[parameters('location')]",
-        "sku": {
-          "name": "[variables('storageAccountType')]"
-        },
-        "kind": "Storage",
-        "properties": {}
-      },
-      {
         "type": "Microsoft.Network/publicIPAddresses",
         "apiVersion": "2018-11-01",
         "name": "[variables('publicIPAddressName')]",
@@ -100,7 +84,7 @@
         "properties": {
           "publicIPAllocationMethod": "[variables('publicIPAddressType')]",
           "dnsSettings": {
-            "domainNameLabel": "[parameters('dnsLabelPrefix')]"
+            "domainNameLabel": "[concat('crankier-', parameters('vmName'))]"
           }
         }
       },
@@ -157,7 +141,6 @@
         "name": "[variables('vmName')]",
         "location": "[parameters('location')]",
         "dependsOn": [
-          "[resourceId('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]",
           "[resourceId('Microsoft.Network/networkInterfaces/', variables('nicName'))]"
         ],
         "properties": {
@@ -178,7 +161,7 @@
               "version": "latest"
             },
             "osDisk": {
-              "name": "server-disk",
+              "name": "[concat(parameters('vmName'), '-disk')]",
               "createOption": "FromImage",
               "managedDisk": {
                 "storageAccountType": "Standard_LRS"
@@ -191,12 +174,6 @@
                 "id": "[resourceId('Microsoft.Network/networkInterfaces',variables('nicName'))]"
               }
             ]
-          },
-          "diagnosticsProfile": {
-            "bootDiagnostics": {
-              "enabled": true,
-              "storageUri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName')), '2016-01-01').primaryEndpoints.blob)]"
-            }
           }
         },
         "resources":[
