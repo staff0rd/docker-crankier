@@ -5,10 +5,7 @@ param (
 
 $exists = Get-AzResourceGroup -name $resourceGroupName -EA SilentlyContinue
 
-Write-Host "InvocationName:" $MyInvocation.InvocationName
-Write-Host "Path:" $MyInvocation.MyCommand.Path
-
-$resourceGroupTemplate = $MyInvocation.InvocationName + "\resourceGroup.json"
+$resourceGroupTemplate = "$PSScriptRoot\resourceGroup.json"
 
 if (-Not $exists) {
     Write-Host Creating resource group $resourceGroupName

@@ -1,280 +1,244 @@
 {
-    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-    "contentVersion": "1.0.0.0",
-    "parameters": {
-      "adminUsername": {
-        "type": "string",
-        "defaultValue": "crankier",
-        "metadata": {
-          "description": "User name for the Virtual Machine."
-        }
-      },
-      "vmSize": {
-        "type": "string",
-        "defaultValue": "Standard_B1s",
-        "metadata": {
-          "description": "Size of VM to provision for the server"
-        }
-      },
-      "numberOfInstances": {
-        "type": "int",
-        "defaultValue": 1,
-        "minValue": 1,
-        "maxValue": 5,
-        "metadata": {
-          "description": "Number of VMs to deploy, limit 5 since this sample is using a single storage account"
-        }
-      },
-      "authenticationType": {
-        "type": "string",
-        "defaultValue": "sshPublicKey",
-        "allowedValues": [
-          "sshPublicKey",
-          "password"
-        ],
-        "metadata": {
-          "description": "Type of authentication to use on the Virtual Machine. SSH key is recommended."
-        }
-      },
-      "adminPasswordOrKey": {
-        "type": "securestring",
-        "metadata": {
-          "description": "SSH Key or password for the Virtual Machine. SSH key is recommended."
-        }
-      },
-      "dnsLabelPrefix": {
-        "type": "string",
-        "metadata": {
-          "description": "Unique DNS Name for the Public IP used to access the Virtual Machine."
-        }
-      },
-      "ubuntuOSVersion": {
-        "type": "string",
-        "defaultValue": "16.04.0-LTS",
-        "metadata": {
-          "description": "The Ubuntu version for the VM. This will pick a fully patched image of this given Ubuntu version."
-        }
-      },
-      "location": {
-        "type": "string",
-        "defaultValue": "[resourceGroup().location]",
-        "metadata": {
-          "description": "Location for all resources."
-        }
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "number": {
+      "type":"int",
+      "defaultValue": "1"
+    },
+    "adminUsername": {
+      "type": "string",
+      "defaultValue": "crankier",
+      "metadata": {
+        "description": "User name for the Virtual Machine."
       }
     },
-    "variables": {
-      "storageAccountName": "[concat(uniquestring(resourceGroup().id), 'salinuxvm')]",
-      "imagePublisher": "Canonical",
-      "imageOffer": "UbuntuServer",
-      "nicName": "client-nic",
-      "addressPrefix": "10.0.0.0/16",
-      "subnetName": "Subnet",
-      "subnetPrefix": "10.0.0.0/24",
-      "storageAccountType": "Standard_LRS",
-      "userAssignedIdentityResourceGroup": "container-registry",
-      "userAssignedIdentityName": "container-registry-identity",
-      "publicIPAddressName": "client-ip",
-      "publicIPAddressType": "Dynamic",
-      "vmName": "client-vm",
-      "virtualNetworkName": "client-vnet",
-      "availabilitySetName": "clients-availability-set",
-      "linuxConfiguration": {
-        "disablePasswordAuthentication": true,
-        "ssh": {
-          "publicKeys": [
-            {
-              "path": "[concat('/home/', parameters('adminUsername'), '/.ssh/authorized_keys')]",
-              "keyData": "[parameters('adminPasswordOrKey')]"
-            }
-          ]
-        }
-      },
-      "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), variables('subnetName'))]"
-    },
-    "resources": [
-      {
-        "type": "Microsoft.Compute/availabilitySets",
-        "name": "[variables('availabilitySetName')]",
-        "apiVersion": "2016-04-30-preview",
-        "location": "[parameters('location')]",
-        "properties": {
-          "platformFaultDomainCount": 2,
-          "platformUpdateDomainCount": 2,
-          "managed": true
-        }
-      },
-      {
-        "type": "Microsoft.Storage/storageAccounts",
-        "apiVersion": "2018-11-01",
-        "name": "[variables('storageAccountName')]",
-        "location": "[parameters('location')]",
-        "sku": {
-          "name": "[variables('storageAccountType')]"
-        },
-        "kind": "Storage",
-        "properties": {}
-      },
-      {
-        "type": "Microsoft.Network/publicIPAddresses",
-        "apiVersion": "2018-11-01",
-        "name": "[concat(variables('publicIPAddressName'), '-', copyindex()]",
-        "location": "[parameters('location')]",
-        "copy": {
-          "name": "publicIPAddressloop",
-          "count": "[parameters('numberOfInstances')]"
-        },
-        "properties": {
-          "publicIPAllocationMethod": "[variables('publicIPAddressType')]",
-          "dnsSettings": {
-            "domainNameLabel": "[concat(parameters('dnsLabelPrefix'), '-', copyindex())]"
-          }
-        }
-      },
-      {
-        "type": "Microsoft.Network/virtualNetworks",
-        "apiVersion": "2018-11-01",
-        "name": "[variables('virtualNetworkName')]",
-        "location": "[parameters('location')]",
-        "properties": {
-          "addressSpace": {
-            "addressPrefixes": [
-              "[variables('addressPrefix')]"
-            ]
-          },
-          "subnets": [
-            {
-              "name": "[variables('subnetName')]",
-              "properties": {
-                "addressPrefix": "[variables('subnetPrefix')]"
-              }
-            }
-          ]
-        }
-      },
-      {
-        "type": "Microsoft.Network/networkInterfaces",
-        "apiVersion": "2018-11-01",
-        "name": "[variables('nicName')]",
-        "location": "[parameters('location')]",
-        "copy": {
-          "name": "nicLoop",
-          "count": "[parameters('numberOfInstances')]"
-        },
-        "dependsOn": [
-          "[resourceId('Microsoft.Network/publicIPAddresses/', concat(variables('publicIPAddressName'), '-', copyindex()))]",
-          "[resourceId('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
-        ],
-        "properties": {
-          "ipConfigurations": [
-            {
-              "name": "ipconfig1",
-              "properties": {
-                "privateIPAllocationMethod": "Dynamic",
-                "publicIPAddress": {
-                  "id": "[resourceId('Microsoft.Network/publicIPAddresses',concat(variables('publicIPAddressName'), '-', copyindex()))]"
-                },
-                "subnet": {
-                  "id": "[variables('subnetRef')]"
-                }
-              }
-            }
-          ]
-        }
-      },
-      {
-        "type": "Microsoft.Compute/virtualMachines",
-        "apiVersion": "2018-10-01",
-        "name": "[concat(variables('vmName'),'-', copyindex())]",
-        "location": "[parameters('location')]",
-        "copy": {
-          "name": "vmLoop",
-          "count": "[parameters('numberOfInstances')]"
-        },
-        "identity": {
-          "type": "UserAssigned",
-          "userAssignedIdentities": {
-              "[resourceID(variables('userAssignedIdentityResourceGroup'),'Microsoft.ManagedIdentity/userAssignedIdentities/',variables('userAssignedIdentityName'))]": {}
-          }
-        },
-        "dependsOn": [
-          "nicLoop"
-        ],
-        "properties": {
-          "hardwareProfile": {
-            "vmSize": "[parameters('vmSize')]"
-          },
-          "osProfile": {
-            "computerName": "[variables('vmName')]",
-            "adminUsername": "[parameters('adminUsername')]",
-            "adminPassword": "[parameters('adminPasswordOrKey')]",
-            "linuxConfiguration": "[if(equals(parameters('authenticationType'), 'password'), json('null'), variables('linuxConfiguration'))]"
-          },
-          "storageProfile": {
-            "imageReference": {
-              "publisher": "[variables('imagePublisher')]",
-              "offer": "[variables('imageOffer')]",
-              "sku": "[parameters('ubuntuOSVersion')]",
-              "version": "latest"
-            },
-            "osDisk": {
-              "name": "client-disk",
-              "createOption": "FromImage",
-              "managedDisk": {
-                "storageAccountType": "Standard_LRS"
-              }
-            }
-          },
-          "networkProfile": {
-            "networkInterfaces": [
-              {
-                "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('nicName'),'-',copyindex())]"
-              }
-            ]
-          },
-          "diagnosticsProfile": {
-            "bootDiagnostics": {
-              "enabled": true,
-              "storageUri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName')), '2016-01-01').primaryEndpoints.blob)]"
-            }
-          }
-        },
-        "resources":[
-            {
-                "name": "install-docker",
-                "type": "extensions",
-                "location": "[resourceGroup().location]",
-                "apiVersion": "2018-10-01",
-                "dependsOn": [
-                    "[concat(variables('vmName'), '-', copyindex())]"
-                ],
-                "tags": {
-                  "displayName": "install-docker"
-                },
-                "properties": {
-                  "publisher": "Microsoft.Azure.Extensions",
-                  "type": "CustomScript",
-                  "typeHandlerVersion": "2.0",
-                  "autoUpgradeMinorVersion": true,
-                  "settings": {
-                    },
-                  "protectedSettings": {
-                    "fileUris": ["https://raw.githubusercontent.com/staff0rd/docker-crankier/master/client/vm/startupScript.sh"],
-                    "commandToExecute": "./virtualMachine.sh"
-                  }
-                }
-              }
-        ]
+    "vmSize": {
+      "type": "string",
+      "defaultValue": "Standard_B1s",
+      "metadata": {
+        "description": "Size of VM to provision for the server"
       }
-    ],
-    "outputs": {
-      "hostname": {
-        "type": "string",
-        "value": "[reference(variables('publicIPAddressName')).dnsSettings.fqdn]"
-      },
-      "sshCommand": {
-        "type": "string",
-        "value": "[concat('ssh ', parameters('adminUsername'), '@', reference(variables('publicIPAddressName')).dnsSettings.fqdn)]"
+    },
+    "authenticationType": {
+      "type": "string",
+      "defaultValue": "sshPublicKey",
+      "allowedValues": [
+        "sshPublicKey",
+        "password"
+      ],
+      "metadata": {
+        "description": "Type of authentication to use on the Virtual Machine. SSH key is recommended."
+      }
+    },
+    "adminPasswordOrKey": {
+      "type": "securestring",
+      "metadata": {
+        "description": "SSH Key or password for the Virtual Machine. SSH key is recommended."
+      }
+    },
+    "dnsLabelPrefix": {
+      "type": "string",
+      "metadata": {
+        "description": "Unique DNS Name for the Public IP used to access the Virtual Machine."
+      }
+    },
+    "ubuntuOSVersion": {
+      "type": "string",
+      "defaultValue": "16.04.0-LTS",
+      "metadata": {
+        "description": "The Ubuntu version for the VM. This will pick a fully patched image of this given Ubuntu version."
+      }
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Location for all resources."
       }
     }
+  },
+  "variables": {
+    "storageAccountName": "[concat(uniquestring(resourceGroup().id), 'salinuxvm')]",
+    "imagePublisher": "Canonical",
+    "imageOffer": "UbuntuServer",
+    "nicName": "server-nic",
+    "addressPrefix": "10.0.0.0/16",
+    "subnetName": "Subnet",
+    "subnetPrefix": "10.0.0.0/24",
+    "storageAccountType": "Standard_LRS",
+    "publicIPAddressName": "server-ip",
+    "publicIPAddressType": "Dynamic",
+    "vmName": "server-vm",
+    "virtualNetworkName": "server-vnet",
+    "linuxConfiguration": {
+      "disablePasswordAuthentication": true,
+      "ssh": {
+        "publicKeys": [
+          {
+            "path": "[concat('/home/', parameters('adminUsername'), '/.ssh/authorized_keys')]",
+            "keyData": "[parameters('adminPasswordOrKey')]"
+          }
+        ]
+      }
+    },
+    "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), variables('subnetName'))]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2018-11-01",
+      "name": "[variables('storageAccountName')]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "[variables('storageAccountType')]"
+      },
+      "kind": "Storage",
+      "properties": {}
+    },
+    {
+      "type": "Microsoft.Network/publicIPAddresses",
+      "apiVersion": "2018-11-01",
+      "name": "[variables('publicIPAddressName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "publicIPAllocationMethod": "[variables('publicIPAddressType')]",
+        "dnsSettings": {
+          "domainNameLabel": "[concat(parameters('dnsLabelPrefix'), '-', parameters('number'))]"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Network/virtualNetworks",
+      "apiVersion": "2018-11-01",
+      "name": "[variables('virtualNetworkName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[variables('addressPrefix')]"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "[variables('subnetName')]",
+            "properties": {
+              "addressPrefix": "[variables('subnetPrefix')]"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Network/networkInterfaces",
+      "apiVersion": "2018-11-01",
+      "name": "[variables('nicName')]",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]",
+        "[resourceId('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
+      ],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]"
+              },
+              "subnet": {
+                "id": "[variables('subnetRef')]"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachines",
+      "apiVersion": "2018-10-01",
+      "name": "[variables('vmName')]",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]",
+        "[resourceId('Microsoft.Network/networkInterfaces/', variables('nicName'))]"
+      ],
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[parameters('vmSize')]"
+        },
+        "osProfile": {
+          "computerName": "[variables('vmName')]",
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[parameters('adminPasswordOrKey')]",
+          "linuxConfiguration": "[if(equals(parameters('authenticationType'), 'password'), json('null'), variables('linuxConfiguration'))]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "[variables('imagePublisher')]",
+            "offer": "[variables('imageOffer')]",
+            "sku": "[parameters('ubuntuOSVersion')]",
+            "version": "latest"
+          },
+          "osDisk": {
+            "name": "server-disk",
+            "createOption": "FromImage",
+            "managedDisk": {
+              "storageAccountType": "Standard_LRS"
+            }
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces',variables('nicName'))]"
+            }
+          ]
+        },
+        "diagnosticsProfile": {
+          "bootDiagnostics": {
+            "enabled": true,
+            "storageUri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName')), '2016-01-01').primaryEndpoints.blob)]"
+          }
+        }
+      },
+      "resources":[
+          {
+              "name": "install-docker",
+              "type": "extensions",
+              "location": "[resourceGroup().location]",
+              "apiVersion": "2018-10-01",
+              "dependsOn": [
+                  "[variables('vmName')]"
+              ],
+              "tags": {
+                "displayName": "install-docker"
+              },
+              "properties": {
+                "publisher": "Microsoft.Azure.Extensions",
+                "type": "CustomScript",
+                "typeHandlerVersion": "2.0",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                  },
+                "protectedSettings": {
+                  "fileUris": ["https://raw.githubusercontent.com/staff0rd/docker-crankier/master/client/vm/startupScript.sh"],
+                  "commandToExecute": "./startupScript.sh"
+                }
+              }
+            }
+      ]
+    }
+  ],
+  "outputs": {
+    "hostname": {
+      "type": "string",
+      "value": "[reference(variables('publicIPAddressName')).dnsSettings.fqdn]"
+    },
+    "sshCommand": {
+      "type": "string",
+      "value": "[concat('ssh ', parameters('adminUsername'), '@', reference(variables('publicIPAddressName')).dnsSettings.fqdn)]"
+    }
   }
+}
