@@ -4,7 +4,7 @@
   "parameters": {
     "number": {
       "type":"int",
-      "defaultValue": "1"
+      "defaultValue": 1
     },
     "adminUsername": {
       "type": "string",
@@ -223,7 +223,7 @@
                 "settings": {
                   },
                 "protectedSettings": {
-                  "fileUris": ["https://raw.githubusercontent.com/staff0rd/docker-crankier/master/client/vm/startupScript.sh"],
+                  "fileUris": ["https://raw.githubusercontent.com/staff0rd/docker-crankier/master/client/vm/startUpScript.sh"],
                   "commandToExecute": "./startupScript.sh"
                 }
               }
