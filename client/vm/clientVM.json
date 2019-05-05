@@ -224,7 +224,7 @@
                   },
                 "protectedSettings": {
                   "fileUris": ["https://raw.githubusercontent.com/staff0rd/docker-crankier/master/client/vm/startUpScript.sh"],
-                  "commandToExecute": "./startupScript.sh"
+                  "commandToExecute": "./startUpScript.sh"
                 }
               }
             }
