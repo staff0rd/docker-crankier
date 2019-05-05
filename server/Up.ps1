@@ -3,7 +3,7 @@ param (
     [string] $location = "westus2",
     [Parameter(Mandatory)]
     [string] $parameterFile,
-    [string] $vmSize = "Standard_B1s"
+    [string] $vmSize = "Standard_B2ms"
 )
 
 & ((Split-Path $MyInvocation.InvocationName) + "\..\CreateResourceGroup.ps1") -ResourceGroupName $resourceGroupName -Location $location
