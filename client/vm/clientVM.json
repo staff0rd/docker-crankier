@@ -59,18 +59,17 @@
     }
   },
   "variables": {
-    "storageAccountName": "[concat(uniquestring(resourceGroup().id), 'salinuxvm')]",
+    "name": "[concat('crankier-', parameters('number'))]",
     "imagePublisher": "Canonical",
     "imageOffer": "UbuntuServer",
-    "nicName": "server-nic",
+    "nicName": "[concat(variables('name'), '-nic')]",
     "addressPrefix": "10.0.0.0/16",
     "subnetName": "Subnet",
     "subnetPrefix": "10.0.0.0/24",
-    "storageAccountType": "Standard_LRS",
-    "publicIPAddressName": "server-ip",
+    "publicIPAddressName": "[concat(variables('name'), '-ip')]",
     "publicIPAddressType": "Dynamic",
-    "vmName": "server-vm",
-    "virtualNetworkName": "server-vnet",
+    "vmName": "[concat(variables('name'), '-vm')]",
+    "virtualNetworkName": "[concat(variables('name'), '-vnet')]",
     "linuxConfiguration": {
       "disablePasswordAuthentication": true,
       "ssh": {
@@ -85,17 +84,6 @@
     "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), variables('subnetName'))]"
   },
   "resources": [
-    {
-      "type": "Microsoft.Storage/storageAccounts",
-      "apiVersion": "2018-11-01",
-      "name": "[variables('storageAccountName')]",
-      "location": "[parameters('location')]",
-      "sku": {
-        "name": "[variables('storageAccountType')]"
-      },
-      "kind": "Storage",
-      "properties": {}
-    },
     {
       "type": "Microsoft.Network/publicIPAddresses",
       "apiVersion": "2018-11-01",
@@ -161,7 +149,6 @@
       "name": "[variables('vmName')]",
       "location": "[parameters('location')]",
       "dependsOn": [
-        "[resourceId('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]",
         "[resourceId('Microsoft.Network/networkInterfaces/', variables('nicName'))]"
       ],
       "properties": {
@@ -182,7 +169,7 @@
             "version": "latest"
           },
           "osDisk": {
-            "name": "server-disk",
+            "name": "[concat(variables('name'), '-disk')]",
             "createOption": "FromImage",
             "managedDisk": {
               "storageAccountType": "Standard_LRS"
@@ -195,12 +182,6 @@
               "id": "[resourceId('Microsoft.Network/networkInterfaces',variables('nicName'))]"
             }
           ]
-        },
-        "diagnosticsProfile": {
-          "bootDiagnostics": {
-            "enabled": true,
-            "storageUri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName')), '2016-01-01').primaryEndpoints.blob)]"
-          }
         }
       },
       "resources":[

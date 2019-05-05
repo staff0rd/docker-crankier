@@ -1,9 +1,9 @@
 param (
     [string] $resourceGroupName = "crankier",
     [string] $location = "westus2",
-    [Parameter(Mandatory)]
-    [string] $parameterFile,
-    [string] $vmSize = "Standard_B1s"
+    [string] $parameterFile = "clientVM.parameters.secret.json",
+    [string] $vmSize = "Standard_B2ms",
+    [int] $number = 1
 )
 
 & ((Split-Path $MyInvocation.InvocationName) + "\..\..\CreateResourceGroup.ps1") -ResourceGroupName $resourceGroupName -Location $location
@@ -14,4 +14,6 @@ New-AzResourceGroupDeployment -ResourceGroupName $resourceGroupName `
     -Location $location `
     -TemplateFile .\clientVM.json `
     -TemplateParameterFile $parameterFile `
-    -vmSize $vmSize
+    -vmSize $vmSize `
+    -number $number `
+    -name vmClient-deploy-$number
