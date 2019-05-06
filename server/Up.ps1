@@ -16,3 +16,5 @@ New-AzResourceGroupDeployment -ResourceGroupName $resourceGroupName `
     -TemplateParameterFile $parameterFile `
     -vmSize $vmSize `
     -vmName $vmName
+
+& ssh-keygen -R "crankier-$vmName.westus2.cloudapp.azure.com"
