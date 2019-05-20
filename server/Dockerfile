@@ -4,7 +4,7 @@ RUN curl https://dot.net/v1/dotnet-install.sh > dotnet-install.sh
 
 RUN chmod +x ./dotnet-install.sh
 
-RUN ./dotnet-install.sh --channel master --install-dir /usr/share/dotnet
+RUN ./dotnet-install.sh --channel master --version 3.0.100-preview6-011744 --install-dir /usr/share/dotnet
 
 RUN git clone --recursive --depth 1 https://github.com/staff0rd/aspnetcore
 
