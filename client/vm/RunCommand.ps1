@@ -25,9 +25,7 @@ for ($i = 0 ; $i -le $count; $i++) {
             param([string]$fqdn, [System.Management.Automation.PSCredential] $credential, [string] $command)
             Remove-SSHTrustedHost $fqdn
             $session = New-SSHSession -ComputerName $fqdn -KeyFile ~\.ssh\id_rsa -credential $credential -AcceptKey
-            Write-Host sesion is up
             $result = Invoke-SSHCommand $session $command
-            Write-Host command is invoked
             Write-Host $result.Output
             if ((Remove-SSHSession $session) -eq $true) {
             } else {
