@@ -12,4 +12,4 @@ WORKDIR /aspnetcore/src/SignalR/perf/benchmarkapps/BenchmarkServer
 
 RUN dotnet build
 
-ENTRYPOINT [ "dotnet", "run" ]
+ENTRYPOINT [ "dotnet", "bin/Debug/netcoreapp3.0/BenchmarkServer.dll" ]
