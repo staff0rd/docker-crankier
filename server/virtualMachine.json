@@ -164,7 +164,7 @@
               "name": "[concat(parameters('vmName'), '-disk')]",
               "createOption": "FromImage",
               "managedDisk": {
-                "storageAccountType": "Standard_LRS"
+                "storageAccountType": "Premium_LRS"
               }
             }
           },
