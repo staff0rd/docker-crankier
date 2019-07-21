@@ -5,9 +5,9 @@ Available on dockerhub via [staff0rd/crankier](https://hub.docker.com/r/staff0rd
 
 ## Usage (client)
 
-The image uses an entrypoint of `dotnet run local` so all additional parameters will be passed to crankier:
+The image uses an entrypoint of `dotnet run` so all additional parameters will be passed to crankier:
 
-`docker run staff0rd/crankier --target-url http://yourDomain/yourHub --workers 10`
+`docker run staff0rd/crankier local --target-url http://yourDomain/yourHub --workers 10`
 
 Or run on azure containers:
 
@@ -18,5 +18,5 @@ Or run on azure containers:
 Run a server that the client(s) will connect to:
 
 ```
-docker run -d -p 80:80 --name crankier staff0rd/crankier-server
+docker run -d -p 80:80 --name crankier staff0rd/crankier server
 ```
