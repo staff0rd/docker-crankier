@@ -18,5 +18,5 @@ Or run on azure containers:
 Run a server that the client(s) will connect to:
 
 ```
-docker run -d -p 80:80 --name crankier staff0rd/crankier server
+docker run -d -p 80:80 --name crankier -e ASPNETCORE_URLS=http://0.0.0.0:80 staff0rd/crankier server
 ```
